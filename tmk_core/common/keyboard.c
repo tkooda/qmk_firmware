@@ -270,6 +270,8 @@ __attribute__((weak)) void housekeeping_task_kb(void) {}
  */
 __attribute__((weak)) void housekeeping_task_user(void) {}
 
+__attribute((weak)) void keyboard_did_start(void) {}
+
 /** \brief keyboard_init
  *
  * FIXME: needs doc

@@ -1056,6 +1056,8 @@ int main(void) {
     virtser_init();
 #endif
 
+    keyboard_did_start();
+
     print("Keyboard start.\n");
     while (1) {
 #if !defined(NO_USB_STARTUP_CHECK)
@@ -1081,7 +1083,6 @@ int main(void) {
             suspend_wakeup_init();
         }
 #endif
-
         keyboard_task();
 
 #ifdef MIDI_ENABLE

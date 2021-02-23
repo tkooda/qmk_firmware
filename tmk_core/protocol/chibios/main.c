@@ -218,6 +218,8 @@ int main(void) {
     sleep_led_init();
 #endif
 
+    keyboard_did_start();
+
     print("Keyboard start.\n");
 
     /* Main loop */

@@ -12,6 +12,8 @@
 
 keymap_config_t keymap_config;
 
+bool scan_keycode(uint8_t keycode);
+
 /** \brief Bootmagic
  *
  * FIXME: needs doc
@@ -22,9 +24,19 @@ void bootmagic(void) {
         eeconfig_init();
     }
 
+    // Quick debounce
+    matrix_scan();
+    wait_ms(10);
+    matrix_scan();
+    wait_ms(10);
+    if (scan_keycode(KC_LALT)) {
+        // Skip bootmagic, go straight to spamming alt for bootcamp
+        return;
+    }
+
     /* do scans in case of bounce */
     print("bootmagic scan: ... ");
-    uint8_t scan = 100;
+    uint8_t scan = 50;
     while (scan--) {
         matrix_scan();
         wait_ms(10);
@@ -138,7 +150,7 @@ void bootmagic(void) {
  *
  * FIXME: needs doc
  */
-static bool scan_keycode(uint8_t keycode) {
+bool scan_keycode(uint8_t keycode) {
     for (uint8_t r = 0; r < MATRIX_ROWS; r++) {
         matrix_row_t matrix_row = matrix_get_row(r);
         for (uint8_t c = 0; c < MATRIX_COLS; c++) {

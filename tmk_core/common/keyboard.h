@@ -73,6 +73,8 @@ void keyboard_post_init_user(void);
 void housekeeping_task_kb(void);
 void housekeeping_task_user(void);
 
+void keyboard_did_start(void);
+
 uint32_t last_input_activity_time(void);     // Timestamp of the last matrix or encoder activity
 uint32_t last_input_activity_elapsed(void);  // Number of milliseconds since the last matrix or encoder activity
 

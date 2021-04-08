@@ -84,27 +84,32 @@ const key_override_t **key_overrides = (const key_override_t *[]){
 																  NULL // Null terminate the array of overrides!
 };
 
+// 2021-04-07 : tkooda : backlight auto-timeout
+#ifdef BACKLIGHT_ENABLE
+#define BACKLIGHT_TIMEOUT 10  // minutes
+static uint16_t idle_timer = 0;
+static uint8_t halfmin_counter = 0;
+static uint8_t previous_backlight_level = 0;
+static bool led_on = true; // don't use backlight_disablle() because it sets level to 0 as well as bool, and backlight_enable() only sets bool
+#endif
 
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  switch (keycode) {
-    case QMKBEST:
-      if (record->event.pressed) {
-        // when keycode QMKBEST is pressed
-        SEND_STRING("QMK is the best thing ever!");
-      } else {
-        // when keycode QMKBEST is released
-      }
-      break;
-    case QMKURL:
-      if (record->event.pressed) {
-        // when keycode QMKURL is pressed
-        SEND_STRING("https://qmk.fm/" SS_TAP(X_ENTER));
-      } else {
-        // when keycode QMKURL is released
-      }
-      break;
+  
+  // 2021-04-07 : tkooda : backlight auto-timeout
+  #ifdef BACKLIGHT_ENABLE
+  if ( record->event.pressed ) {
+	
+	if ( ! led_on ) {
+	  backlight_set( previous_backlight_level );
+	  led_on = true;
+	}
+	
+	idle_timer = timer_read();
+	halfmin_counter = 0;
   }
+  #endif
+  
   return true;
 }
 
@@ -113,7 +118,28 @@ void matrix_init_user(void) {
 }
 
 void matrix_scan_user(void) {
-
+  
+  // 2021-04-07 : tkooda : backlight auto-disable
+  #ifdef BACKLIGHT_ENABLE
+  if ( idle_timer == 0 ) idle_timer = timer_read(); // init timer
+  
+  if ( led_on ) {
+	
+	if ( timer_elapsed( idle_timer ) > 30000 ) {
+	  halfmin_counter++;
+	  idle_timer = timer_read();
+	}
+	
+	if ( halfmin_counter >= BACKLIGHT_TIMEOUT * 2 ) {
+	  previous_backlight_level = get_backlight_level();
+	  backlight_set( 0 );
+	  led_on = false;
+	  halfmin_counter = 0;
+	}
+	
+  }
+  #endif
+  
 }
 
 void led_set_user(uint8_t usb_led) {
